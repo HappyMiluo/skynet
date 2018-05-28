@@ -108,9 +108,28 @@ static const char * load_config = "\
 		assert(load(code,[[@]]..filename,[[t]],result))()\n\
 		current_path = last_path\n\
 	end\n\
+	local function configname_split(szFullString, szSeparator)\n\
+		local nFindStartIndex = 1\n\
+		local nSplitIndex = 1\n\
+		local nSplitArray = {}\n\
+		while true do\n\
+			local nFindLastIndex = string.find(szFullString, szSeparator, nFindStartIndex)\n\
+			if not nFindLastIndex then\n\
+				nSplitArray[nSplitIndex] = string.sub(szFullString, nFindStartIndex, string.len(szFullString))\n\
+				break\n\
+			end\n\
+			nSplitArray[nSplitIndex] = string.sub(szFullString, nFindStartIndex, nFindLastIndex - 1)\n\
+			nFindStartIndex = nFindLastIndex + string.len(szSeparator)\n\
+			nSplitIndex = nSplitIndex + 1\n\
+		end\n\
+		return nSplitArray\n\
+	end\n\
 	setmetatable(result, { __index = { include = include } })\n\
-	local config_name = ...\n\
-	include(config_name)\n\
+	local config_names = ...\n\
+	local config_name_arr = configname_split(config_names, ',')\n\
+	for _, config_name_item in pairs(config_name_arr) do\n\
+		include(config_name_item)\n\
+	end\n\
 	setmetatable(result, nil)\n\
 	return result\n\
 ";
